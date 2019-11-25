@@ -1,0 +1,35 @@
+stages:
+  - build
+
+variables:
+  BUILD_NUMBER: $CI_PIPELINE_IID
+  REPO: git@gitlab.int.mustapp.me:frontend/ripen.git
+
+
+.build_template: &build_template
+  stage: build
+  variables:
+    project: node-migrator
+  script:
+    - docker-compose -p $project build --pull
+    - docker-compose -p $project push
+
+
+### BUILD ###
+
+Build Must:
+  extends: .build_template
+  variables:
+    registry: registry.int.mustapp.me:5001/
+  when: manual
+  allow_failure: false
+  tags: ["mustapp", "shell"]
+
+
+Build Teletype:
+  extends: .build_template
+  variables:
+    registry: registry.int.teletype.in:5000/
+  when: manual
+  allow_failure: false
+  tags: ["mustapp", "shell"]

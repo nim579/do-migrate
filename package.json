@@ -1,0 +1,29 @@
+{
+  "name": "migrator",
+  "version": "1.0.0",
+  "description": "Postgresql migrator",
+  "main": "index.js",
+  "bin": {
+    "migrator": "./bin/migrator"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "npm run build",
+    "build": "rm -rf lib/ && exec $(npm bin)/coffee -c -o lib/ src/",
+    "start": "node bin/migrator"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:nim579/do-migrate.git"
+  },
+  "author": "Nick Iv (nim579)",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "lodash": "^4.17.15",
+    "pg": "^6.4.2"
+  },
+  "devDependencies": {
+    "coffeescript": "^2.4.1"
+  }
+}

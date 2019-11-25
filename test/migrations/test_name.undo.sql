@@ -1,0 +1,3 @@
+DROP TABLE test2;
+
+ALTER TABLE test DROP COLUMN IF EXISTS is_json;
