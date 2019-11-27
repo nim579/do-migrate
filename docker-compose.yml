@@ -1,5 +1,5 @@
 version: "2.1"
 services:
     migrator:
-        image: ${registry}node-migrator:${version-latest}
+        image: nim579/do-migrate:${version-latest}
         build: .
