@@ -7,7 +7,7 @@
     "migrator": "./bin/migrator"
   },
   "scripts": {
-    "build": "rm -rf lib/ && exec $(npm bin)/coffee -c -o lib/ src/",
+    "build": "rm -rf lib/ && npx coffee -c -o lib/ src/",
     "prepublishOnly": "npm run build",
     "postinstall": "npm run build",
     "start": "node bin/migrator"
