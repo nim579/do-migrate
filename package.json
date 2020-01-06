@@ -7,9 +7,9 @@
     "migrator": "./bin/migrator"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublishOnly": "npm run build",
     "build": "rm -rf lib/ && exec $(npm bin)/coffee -c -o lib/ src/",
+    "prepublishOnly": "npm run build",
+    "postinstall": "npm run build",
     "start": "node bin/migrator"
   },
   "repository": {
@@ -21,9 +21,7 @@
   "dependencies": {
     "commander": "^2.9.0",
     "lodash": "^4.17.15",
-    "pg": "^6.4.2"
-  },
-  "devDependencies": {
+    "pg": "^6.4.2",
     "coffeescript": "^2.4.1"
   }
 }
