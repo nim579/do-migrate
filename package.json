@@ -1,16 +1,15 @@
 {
-  "name": "migrator",
+  "name": "do-migrate",
   "version": "1.0.0",
   "description": "Postgresql migrator",
   "main": "index.js",
   "bin": {
-    "migrator": "./bin/migrator"
+    "do-migrate": "./bin/do-migrate"
   },
   "scripts": {
     "build": "rm -rf lib/ && npx coffee -c -o lib/ src/",
     "prepublishOnly": "npm run build",
-    "postinstall": "npm run build",
-    "start": "node bin/migrator"
+    "start": "node bin/do-migrate"
   },
   "repository": {
     "type": "git",
@@ -21,7 +20,9 @@
   "dependencies": {
     "commander": "^2.9.0",
     "lodash": "^4.17.15",
-    "pg": "^6.4.2",
-    "coffeescript": "^2.4.1"
+    "pg": "^6.4.2"
+  },
+  "devDependencies": {
+    "coffeescript": "^2.5.0"
   }
 }

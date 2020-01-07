@@ -106,12 +106,12 @@ Clone repo and run `npm install` or use Docker.
 
 Globaly:
 ``` bash
-$ migrator <args> [command] [params]
+$ do-migrate <args> [command] [params]
 ```
 
 Localy:
 ``` bash
-$ $(npm bin)/migrator -- <args> [command] [params]
+$ $(npm bin)/do-migrate -- <args> [command] [params]
 ```
 
 Commands:
