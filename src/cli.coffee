@@ -93,11 +93,13 @@ class MigratorCLI
     getOptions: (program = @program, env = @env)->
         params = {}
 
-        for param, name of @mapEnv
-            params[name] = env[param] if env[param]
+        _.forEach @mapEnv, (param, key)->
+            value = _.get env, key
+            _.set params, param, value if value
 
-        for param, name of @mapParams
-            params[name] = program[param] if program[param]
+        _.forEach @mapParams, (param, key)->
+            value = _.get program, key
+            _.set params, param, value if value
 
         return params
 
