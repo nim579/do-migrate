@@ -1,13 +1,15 @@
 {
   "name": "do-migrate",
   "version": "1.0.0",
-  "description": "Postgresql migrator",
-  "main": "index.js",
+  "description": "PostgreSQL migrator",
+  "main": "lib/index.js",
+  "type": "module",
   "bin": {
-    "do-migrate": "./bin/do-migrate"
+    "do-migrate": "./bin/do-migrate.js"
   },
   "scripts": {
-    "build": "rm -rf lib/ && npx coffee -c -o lib/ src/",
+    "test": "mocha",
+    "build": "tsc",
     "prepublishOnly": "npm run build",
     "start": "node bin/do-migrate"
   },
@@ -18,11 +20,23 @@
   "author": "Nick Iv (nim579)",
   "license": "MIT",
   "dependencies": {
-    "commander": "^2.9.0",
+    "@commander-js/extra-typings": "^11.1.0",
+    "commander": "^11.1.0",
+    "dotenv": "^16.4.1",
     "lodash": "^4.17.21",
-    "pg": "^6.4.2"
+    "pg": "^8.11.3"
   },
   "devDependencies": {
-    "coffeescript": "^2.5.0"
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@types/lodash": "^4.14.202",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.10",
+    "@types/pg": "^8.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.20.0",
+    "@typescript-eslint/parser": "^6.20.0",
+    "eslint": "^8.56.0",
+    "mocha": "^10.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }

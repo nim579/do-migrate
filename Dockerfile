@@ -1,4 +1,4 @@
-FROM node:erbium-alpine
+FROM node:iron-alpine
 
 WORKDIR /migrator
 
@@ -11,4 +11,4 @@ COPY . .
 
 RUN npm run build
 
-ENTRYPOINT ["sh", "./run.sh"]
+ENTRYPOINT ["npm", "start"]
