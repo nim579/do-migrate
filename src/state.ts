@@ -122,7 +122,7 @@ export class State {
 			)
 		`);
 
-		const result = await this.db.r<VersionRecord>(`SELECT * FROM ${this.tableName} ORDER BY exec_date`);
+		const result = await this.db.r<VersionRecord>(/*sql*/`SELECT * FROM ${this.tableName} ORDER BY exec_date`);
 
 		this.table = result.map(item => {
 			return new Migration(item.name, item.do_sql, item.undo_sql, item.do_hash, item.undo_hash);

@@ -9,6 +9,10 @@ export enum Action {
 	Add = 'add',
 }
 
+function sleep(time = 1) {
+	return new Promise(resolve => setTimeout(resolve, time));
+}
+
 export class Process {
 	db: DB;
 	state: State;
@@ -73,6 +77,8 @@ export class Process {
 
 		await this.db.transaction(async db => {
 			for (const item of actions) {
+				await sleep(100); // Skip some time for exec date gap
+
 				try {
 					switch (item.action) {
 					case Action.Remove:
@@ -110,13 +116,14 @@ export class Process {
 		if (migration)
 			await db.q(migration.sql.do);
 
-		await db.q(`
-			INSERT INTO ${this.state.tableName} (name, do_sql, do_hash, undo_sql, undo_hash)
-			VALUES ($1, $2, $3, $4, $5)
+		await db.q(/*sql*/`
+			INSERT INTO ${this.state.tableName} (name, do_sql, do_hash, undo_sql, undo_hash, exec_date)
+			VALUES ($1, $2, $3, $4, $5, $6)
 		`, [
 			name,
 			migration.do.sql, migration.do.hash,
 			migration.undo.sql, migration.undo.hash,
+			new Date(),
 		]);
 	}
 
@@ -130,19 +137,20 @@ export class Process {
 		if (migration)
 			await db.q(migration.sql.do);
 
-		await db.q(`
+		await db.q(/*sql*/`
 			UPDATE ${this.state.tableName}
 			SET
 				do_sql = $2,
 				do_hash = $3,
 				undo_sql = $4,
 				undo_hash = $5,
-				exec_date = now()
+				exec_date = $6
 			WHERE name = $1
 		`, [
 			name,
 			migration.do.sql, migration.do.hash,
 			migration.undo.sql, migration.undo.hash,
+			new Date(),
 		]);
 	}
 }
