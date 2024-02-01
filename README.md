@@ -1,10 +1,29 @@
-# Do Migrate!
+# Do Migrate
 
 PostgreSQL migration tool on Node.js.
 
 ## Overview
 
-Table schema:
+This SQL migration tool is designed to facilitate seamless database schema evolution. It operates based on a directory containing migration scripts and a defined order of execution. Here’s an overview of its core principles:
+
+## Migration Directory Structure
+
+1. *Migration Files*: The tool relies on a structured folder containing SQL migration files. Each migration consists of two files: `{name}.do.sql` for applying the migration and `{name}.undo.sql` for reverting it.
+2. *Order File*: Within the migration folder, an `order` file explicitly lists the names of the migrations in the sequence they should be applied. This ensures controlled and predictable migration execution.
+
+## Migration Execution Logic
+
+1. *Applying New Migrations*: When a new migration is added to the directory and listed in the `order` file, the tool automatically executes the corresponding `.do.sql` file to apply the migration.
+2. *Reverting Migrations*: If a migration is removed from the order file, the tool finds the associated .undo.sql file and executes it to revert the migration.
+3. *Modifying Migrations*: Should a migration be altered, the tool first reverts the previous version of the migration using the .undo.sql file and then applies the new version with the `.do.sql` file.
+4. *Handling Mid-List Changes*: Any changes (addition, deletion, modification) not at the end of the order list trigger the tool to revert migrations in reverse order up to the point of the earliest change. Subsequently, it applies all new or modified migrations in the correct sequence.
+
+### SQL Migration History Table
+
+Crucially, the tool maintains a table within the database that records the history of applied migrations along with their corresponding undo scripts. This facilitates efficient tracking of changes and enables precise rollback capabilities, ensuring the database schema can be accurately reverted to any previous state as defined by the migration history.
+
+Columns:
+
 * name
 * do_sql — executed migration
 * undo_sql — undo migration SQL commands
@@ -12,59 +31,8 @@ Table schema:
 * undo_hash — undo migration hash (SHA-256)
 * exec_date — executed date
 
-Files:
-* `{name}.do.sql` — migration file
-* `{name}.undo.sql` — undo migration file
-* `order` — file with ordered migrations names.
+### Possible actions
 
-Inspect data exapmle:
-``` js
-{
-    "table": {
-        "initial": {
-            "name": "initial",
-            "do_hash": "870f2713310e990bd8ed4951fb9560fb8591def24a324abea0d8fd010940752a",
-            "do_sql": "CREATE TABLE test (\n    key varchar(255) UNIQUE,\n    value text\n);\n",
-            "undo_hash": "5111d07169d0ba3c9f4c861fa6076c786f86469e298450c641c3e70ea21df8f6",
-            "undo_sql": "DROP TABLE test;\n",
-            "exec_date": "2017-05-10T15:33:40.485Z"
-        },
-        "test_name": {
-            "name": "test_name",
-            "do_hash": "bb8d5549c23390eeef2293dc3366e6e97f33102d9326e42af8ee80ec1afba988",
-            "do_sql": "ALTER TABLE test ADD COLUMN is_json boolean NOT NULL DEFAULT false;\n\nCREATE TABLE test2 (\n    key varchar(255)  UNIQUE,\n    value text\n);\n",
-            "undo_hash": "0fcb0be684de7480b38486d654c8e89a4a23233dafe6a9bae20ce860c1d78fac",
-            "undo_sql": "ALTER TABLE test DROP COLUMN IF EXISTS is_json;\n\nDROP TABLE test2;\nDROP TABLE _test2;\n",
-            "exec_date": "2017-05-10T15:34:17.961Z"
-        }
-    },
-    "files": {
-        "initial": {
-            "do_sql": "CREATE TABLE test (\n    key varchar(255) UNIQUE,\n    value text\n);\n",
-            "undo_sql": "DROP TABLE test;\n",
-            "do_hash": "870f2713310e990bd8ed4951fb9560fb8591def24a324abea0d8fd010940752a",
-            "undo_hash": "5111d07169d0ba3c9f4c861fa6076c786f86469e298450c641c3e70ea21df8f6"
-        },
-        "test_name": {
-            "do_sql": "ALTER TABLE test ADD COLUMN is_json boolean NOT NULL DEFAULT false;\n\nCREATE TABLE test2 (\n    key varchar(255) UNIQUE,\n    value text\n);\n",
-            "undo_sql": "ALTER TABLE test DROP COLUMN IF EXISTS is_json;\n\nDROP TABLE test2;\nDROP TABLE _test2;\n",
-            "do_hash": "bb8d5549c23390eeef2293dc3366e6e97f33102d9326e42af8ee80ec1afba988",
-            "undo_hash": "0fcb0be684de7480b38486d654c8e89a4a23233dafe6a9bae20ce860c1d78fac"
-        }
-    },
-    "map": [
-        {
-            "name": "initial",
-            "state": "executed"
-        }, {
-            "name": "test_name",
-            "state": "executed"
-        }
-    ]
-}
-```
-
-### Statuses
 * executed — Already executed migration
 * removed — Migration removed (executed "undo migration")
 * changed — Migration changed (executed "undo migration" and "do migration")
@@ -72,173 +40,170 @@ Inspect data exapmle:
 * inited — special status on initial migrations
 * shrink — special status for shrink migrations
 
-### Order file
+### Ordering and file structure
 
-Migrations order list by names.
-Example:
-```
-name1
-name2
-name3
-```
+Example `order` file:
 
-**Initiated cursor:**
-```
-~inited~
+```txt
+migration1
+migration2
+migration3
 ```
 
-Use it if you integrating migrator in an existing project. Migrations before this cursor will not be executed if that not in table schema and just added to it. Can be placed on any line.
+Example migrations dir list:
 
-
-**Shrinking cursor:**
+```txt
+migration1.do.sql
+migration1.undo.sql
+migration2.do.sql
+migration2.undo.sql
+migration3.do.sql
+migration3.undo.sql
+order
 ```
-~shrink~~
-```
-
-Use it if you want to remove very old migrations files from your project. Migrations before this cursor will be ignored and you can remove migrations files and names in order list. Can be placed on any line.
 
 ## Install
 
-Clone repo and run `npm install` or use Docker.
-
+Clone repo and run `npm install do-migrate` or use Docker.
 
 ## CLI usage
 
-Globaly:
+View action plan:
+
 ``` bash
-$ do-migrate <args> [command] [params]
+npx do-migrate [options]
 ```
 
-Localy:
+Execute:
+
 ``` bash
-$ $(npm bin)/do-migrate -- <args> [command] [params]
-```
-
-Commands:
-* **run** — Run all migrations if needed, without asking
-* **interactive** — Run migrations in interactive mode
-* **inspect** — List all migrations with states
-* **remove** *<migration>* — Remove migration
-
-Options:
-* **-h**, **--help** — output usage information
-* **--host** *<host>* — Database host
-* **--port** *<number>* — Database port
-* **--user** *<username>* — Database user
-* **--password** *<password>* — Database password
-* **--database** *<base_name>* — Database schema name
-* **--schema-table** *<name>* — Migrator table name
-* **-M**, **--migrations** *<path>* — Path to migrations files
-* **-L**, **--list-name** *<name>* — Migrations order list file name
-* **-V**, **--version** — output the version number
-
-
-## Program usage
-
-``` coffee
-Migrator = require('do-migrate')
-
-migrator = new Migrator options
-migrator.migrate()
+npx do-migrate --exec [options]
 ```
 
 Options:
-* *host* — Database host
-* *port* — Database port
-* *user* — Database user
-* *password* — Database password
-* *database* — Database schema name
-* *migrations* — Path to migrations files
-* *migrations_list* — Migrations order list file name
-* *schema_table* — Migrator table name
 
-Methods:
-* **inspect(callback)** — return promise with info about migrations.
-* **migrate(progress)** — migrate all needed migrations. Return promise with info about migrations. In *progress* return migration status (action and migration name).
-* **remove(name, transaction=true)** – force remove migration by name (*transaction* is flag if is single transaction). Return promise,
-* **change(name, transaction=true)** — force change migration by name (*transaction* is flag if is single transaction). Return promise,
-* **add(name, transaction=true)** — force add migration by name (*transaction* is flag if is single transaction). Return promise,
-* **destroy()** — close DB connection and destroy migrator
+* **--exec** — Execute migration. You must use this flag for run migrations
+* **--host \<host\>** — Database hostname (default: "localhost", env: MIGRATOR_DB_HOST)
+* **--port \<port\>** — Database port (default: 5432, env: MIGRATOR_DB_PORT)
+* **--user \<username\>** — Database user (env: MIGRATOR_DB_USER)
+* **--password \<password\>** — Database password (env: MIGRATOR_DB_PASSWORD)
+* **--database \<name\>** — Database name (env: MIGRATOR_DB_DATABASE)
+* **--schema-table \<name\>** — Migrator sync table name (default: "schema_versions", env: MIGRATOR_TABLE_NAME)
+* **--schema-name \<name\>** — Database schema name (default: "public", env: MIGRATOR_DB_SCHEMA_NAME)
+* **--path \<path\>** — Path to migrations files dir (env: MITRATOR_FILES_PATH)
+* **-v**, **--version** — Output the current version
+* **-h**, **--help** — Display help for command
 
-Inspect data structure:
-* table — migrations executed and saved in DB table (name, do_sql, undo_sql, do_hash `sha256`, undo_hash `sha256`, exec_date)
-* files — migrations in files (name, do_sql, undo_sql, do_hash `sha256`, undo_hash `sha256`, exec_date)
-* map — all migrations (name, state)
+Env variables:
 
-States:
-* executed — already executed
-* added — new migration
-* changed — changed migration
-* removed – removed migration
-* inited — initial migration
-* shrink — shrink migration
+* `MIGRATOR_DB_HOST` — Database host (default: localhost)
+* `MIGRATOR_DB_PORT` — Database port (default: 5432)
+* `MIGRATOR_DB_USER` — Database user (default: postgres)
+* `MIGRATOR_DB_PASSWORD` Database password (default empty)
+* `MIGRATOR_DB_DATABASE` — Database name (default: postgres)
+* `MIGRATOR_DB_SCHEMA_NAME` — Database schema name (default: public)
+* `MIGRATOR_DB_SSL_REQUIRED` — SSL required flag (user true/false, default: false)
+* `MIGRATOR_DB_SSL_CA` — SSL CA (pem string)
+* `MITRATOR_FILES_PATH` — Path to migration dir (default: ./migrations)
+* `MITRATOR_ORDER_FILE` — Order file name (default: order)
+* `MIGRATOR_TABLE_NAME` — Sync table name (default: schema_versions)
 
+## API usage
 
-## Docker usage
+``` ts
+import Migrator, { Config } from 'do-migrate';
 
-### Build base image
+const config: Config = {
+  db: {
+    host: get('MIGRATOR_DB_HOST', 'localhost'),
+    port: get('MIGRATOR_DB_PORT', 5432),
+    user: get('MIGRATOR_DB_USER', 'postgres'),
+    ...
+  },
+  migrations: {
+    path: path.resolve(__dirname, './migrations'),
+    ...
+  }
+};
 
-Dockerfile:
-``` docker
-FROM nim579/do-migrate
+const migrator = new Migrator(config);
 
-ADD ./migrations /migrator/migrations
-ADD ./env.json /migrator/env.json # Optional env variables map file
+// actions list without execution
+console.log(
+  await migrator.inspect();
+); 
 
-CMD [ "interactive" ] # Optional command and args for CLI
+// execute migrations
+await migrator.migrate((action) => console.log(action));
 ```
 
-Command:
-``` bash
-$ docker run --name migrator -d -e ... nim579/do-migrate
+Types:
+
+```ts
+type Config = {
+  db?: {
+    host?: string;
+    port?: number;
+    user?: string;
+    password?: string;
+    database?: string;
+    ... // pg.PoolConfig
+  };
+  migrations?: {
+    path?: string;
+    order_file?: string;
+    schema?: string;
+    table?: string;
+  };
+};
+
+enum Action {
+  Skip = 'skip',
+  Shrink = 'shrink',
+  Remove = 'remove',
+  Change = 'change',
+  Add = 'add',
+}
+
+interface Migrator {
+  constructor(config: Config): void
+  inspect(): Promise<{ name: string;  action: Action; }[]>
+  migrate(
+    notify?: (action: { name: string; action: Action, success: boolean }) => void,
+    userActions?: { name: string; action: Action }[]
+  ): Promise<void>
+}
 ```
 
-Command:
-```
-$ docker run --name migrator -it -e ... nim579/do-migrate interactive
+## Docker
+
+Inspect:
+
+``` sh
+docker run --name migrator -e MIGRATOR_DB_HOST=localhost -e ... --volume ./migrations:/migrator/migrations nim579/do-migrate
 ```
 
-Compose:
+Execute:
+
+``` sh
+docker run --name migrator -e MIGRATOR_DB_HOST=localhost -e ... --volume ./migrations:/migrator/migrations nim579/do-migrate --exec
+```
+
+Docker Compose:
+
 ``` yaml
 version: "2"
 services:
   migrator:
-    image: app-migrator
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: nim579/do-migrate:2
+    command:
+       - "--exec"
     environment:
-      MIGRATOR_DB_HOST=localhost
-      MIGRATOR_DB_PORT=5432
-      MIGRATOR_DB_USER=postgres
-      MIGRATOR_DB_PASSWORD=admin
-      MIGRATOR_DB_DATABASE=test
-```
-
-### From original image
-
-Command:
-``` bash
-$ docker run --name migrator -d -e ... --volume ./migrations:/migrator/migrations nim579/do-migrate
-```
-
-Command for interactive:
-```
-$ docker run --name migrator -it -e ... --volume ./migrations:/migrator/migrations nim579/do-migrate interactive
-```
-
-Compose:
-``` yaml
-version: "2"
-services:
-  migrator:
-    image: nim579/do-migrate
-    environment:
-      MIGRATOR_DB_HOST=localhost
-      MIGRATOR_DB_PORT=5432
-      MIGRATOR_DB_USER=postgres
-      MIGRATOR_DB_PASSWORD=admin
-      MIGRATOR_DB_DATABASE=test
+      - MIGRATOR_DB_HOST
+      - MIGRATOR_DB_PORT
+      - MIGRATOR_DB_USER
+      - MIGRATOR_DB_PASSWORD
+      - MIGRATOR_DB_DATABASE
     volume:
-      - ./migrations:/migrator/migrations:ro
+      - ./migrations:/migrator/migrations
 ```

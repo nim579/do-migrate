@@ -1,5 +1,0 @@
-version: "2.1"
-services:
-    migrator:
-        image: nim579/do-migrate:${version-latest}
-        build: .
