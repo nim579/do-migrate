@@ -2,9 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Command, Option } from '@commander-js/extra-typings';
-import { DB } from './db.js';
-import { State } from './state.js';
-import { Migrator } from './migrator.js';
+import Migrator from './index.js';
 import envConfig from './config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -76,24 +74,27 @@ if (cliConfig.schemaTable) config.migrations.table = cliConfig.schemaTable;
 if (cliConfig.schemaName) config.migrations.schema = cliConfig.schemaName;
 if (cliConfig.path) config.migrations.path = cliConfig.path;
 
-const db = new DB(config.db, 'migragor');
-const state = new State(db, config.migrations);
-const migragor = new Migrator(db, state);
+const migragor = new Migrator(config);
 
 function capitalize(text: string) {
 	return `${text.slice(0, 1).toUpperCase()}${text.slice(1)}`;
 }
 
-if (cliConfig.exec) {
-	migragor.migrate(action => {
-		// eslint-disable-next-line no-console
-		console.log(`${capitalize(action.action)} migration "${action.name}":\t${action.success ? 'done' : 'failed'}`);
-	});
-} else {
-	migragor.inspect().then(actions => {
-		for (const action of actions) {
+(async () => {
+	if (cliConfig.exec) {
+		await migragor.migrate(action => {
 			// eslint-disable-next-line no-console
-			console.log(`${capitalize(action.action)} migration "${action.name}"`);
-		}
-	});
-}
+			console.log(`${capitalize(action.action)} migration "${action.name}":\t${action.success ? 'done' : 'failed'}`);
+		});
+	} else {
+		await migragor.inspect().then(actions => {
+			for (const action of actions) {
+				// eslint-disable-next-line no-console
+				console.log(`${capitalize(action.action)} migration "${action.name}"`);
+			}
+		});
+	}
+
+	process.exit(0);
+})();
+

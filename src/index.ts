@@ -1,6 +1,6 @@
 import envConfig from './config.js';
 import { DB } from './db.js';
-import { Migrator as Process, Action } from './migrator.js';
+import { Process, Action } from './process.js';
 import { State, Migration } from './state.js';
 
 export default class Migrator {

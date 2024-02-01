@@ -9,7 +9,7 @@ export enum Action {
 	Add = 'add',
 }
 
-export class Migrator {
+export class Process {
 	db: DB;
 	state: State;
 

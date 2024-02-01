@@ -41,6 +41,4 @@ jspm_packages
 build
 dev
 lib
-config.json
-app.json
-*.env
+*.local

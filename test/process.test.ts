@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { Action, Migrator } from '../src/migrator.js';
+import { Action, Process } from '../src/process.js';
 import { Migration } from '../src/state.js';
 import * as config from '../src/config.js';
 import { MockedDB, MockedState } from './mocks.js';
@@ -8,7 +8,7 @@ import { MockedDB, MockedState } from './mocks.js';
 let db = new MockedDB(config.db, 'fake');
 let state = new MockedState(db, config.migrations);
 
-describe('Migrator', () => {
+describe('Process', () => {
 	before(() => {
 		db = new MockedDB(config.db, 'fake');
 		state = new MockedState(db, config.migrations);
@@ -16,7 +16,7 @@ describe('Migrator', () => {
 
 	describe('inspect()', () => {
 		it('No changes', async () => {
-			const migrator = new Migrator(db, state);
+			const migrator = new Process(db, state);
 
 			state.table = [
 				new Migration('1', '1', '1'),
@@ -43,7 +43,7 @@ describe('Migrator', () => {
 		});
 
 		it('Shrink', async () => {
-			const migrator = new Migrator(db, state);
+			const migrator = new Process(db, state);
 
 			state.table = [
 				new Migration('1', '1', '1'),
@@ -74,7 +74,7 @@ describe('Migrator', () => {
 		});
 
 		it('Add', async () => {
-			const migrator = new Migrator(db, state);
+			const migrator = new Process(db, state);
 
 			state.table = [
 				new Migration('1', '1', '1'),
@@ -103,7 +103,7 @@ describe('Migrator', () => {
 		});
 
 		it('Change simple', async () => {
-			const migrator = new Migrator(db, state);
+			const migrator = new Process(db, state);
 
 			state.table = [
 				new Migration('1', '1', '1'),
@@ -135,7 +135,7 @@ describe('Migrator', () => {
 		});
 
 		it('Change center', async () => {
-			const migrator = new Migrator(db, state);
+			const migrator = new Process(db, state);
 
 			state.table = [
 				new Migration('1', '1', '1'),
@@ -171,7 +171,7 @@ describe('Migrator', () => {
 		});
 
 		it('Add center', async () => {
-			const migrator = new Migrator(db, state);
+			const migrator = new Process(db, state);
 
 			state.table = [
 				new Migration('1', '1', '1'),
@@ -207,7 +207,7 @@ describe('Migrator', () => {
 		});
 
 		it('Remove center', async () => {
-			const migrator = new Migrator(db, state);
+			const migrator = new Process(db, state);
 
 			state.table = [
 				new Migration('1', '1', '1'),
@@ -240,7 +240,7 @@ describe('Migrator', () => {
 		});
 
 		it('Swap end', async () => {
-			const migrator = new Migrator(db, state);
+			const migrator = new Process(db, state);
 
 			state.table = [
 				new Migration('1', '1', '1'),
@@ -274,7 +274,7 @@ describe('Migrator', () => {
 		});
 
 		it('Swap center', async () => {
-			const migrator = new Migrator(db, state);
+			const migrator = new Process(db, state);
 
 			state.table = [
 				new Migration('1', '1', '1'),
@@ -309,7 +309,7 @@ describe('Migrator', () => {
 		});
 
 		it('Mixed', async () => {
-			const migrator = new Migrator(db, state);
+			const migrator = new Process(db, state);
 
 			state.table = [
 				new Migration('1', '1', '1'),
@@ -348,7 +348,7 @@ describe('Migrator', () => {
 		it('standard', async () => {
 			const db = new MockedDB(config.db, 'fake');
 			const state = new MockedState(db, config.migrations);
-			const migrator = new Migrator(db, state);
+			const migrator = new Process(db, state);
 
 			state.table = [
 				new Migration('test1', 'create table test1 (id int);', 'drop table test1;'),

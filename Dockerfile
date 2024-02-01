@@ -11,4 +11,4 @@ COPY . .
 
 RUN npm run build
 
-ENTRYPOINT ["npm", "start"]
+ENTRYPOINT ["npm", "start", "--"]
