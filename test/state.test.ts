@@ -91,7 +91,7 @@ describe('State', () => {
 		assert.equal(state.migrations[2]?.name, null);
 
 		assert.equal(state.table[0]?.do.sql, 'CREATE TABLE test (id: int);');
-		assert.equal(state.migrations[0]?.do.sql, 'CREATE TABLE test (\n    key varchar(255) UNIQUE,\n    value text\n);\n');
+		assert.equal(state.migrations[0]?.do.sql, 'CREATE TABLE test (\n\tkey varchar(255) UNIQUE,\n\tvalue text\n);\n');
 		assert.equal(state.table[0]?.undo.sql, 'DROP TABLE test;');
 		assert.equal(state.migrations[0]?.undo.sql, 'DROP TABLE test;\n');
 

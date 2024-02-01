@@ -82,16 +82,17 @@ npx do-migrate --exec [options]
 
 Options:
 
-* **-h**, **--help** — output usage information
-* **--host** *<host>* — Database host
-* **--port** *<number>* — Database port
-* **--user** *<username>* — Database user
-* **--password** *<password>* — Database password
-* **--database** *<base_name>* — Database schema name
-* **--schema-table** *<name>* — Migrator table name
-* **-M**, **--migrations** *<path>* — Path to migrations files
-* **-L**, **--list-name** *<name>* — Migrations order list file name
-* **-V**, **--version** — output the version number
+* **--exec** — Execute migration. You must use this flag for run migrations
+* **--host \<host\>** — Database hostname (default: "localhost", env: MIGRATOR_DB_HOST)
+* **--port \<port\>** — Database port (default: 5432, env: MIGRATOR_DB_PORT)
+* **--user \<username\>** — Database user (env: MIGRATOR_DB_USER)
+* **--password \<password\>** — Database password (env: MIGRATOR_DB_PASSWORD)
+* **--database \<name\>** — Database name (env: MIGRATOR_DB_DATABASE)
+* **--schema-table \<name\>** — Migrator sync table name (default: "schema_versions", env: MIGRATOR_TABLE_NAME)
+* **--schema-name \<name\>** — Database schema name (default: "public", env: MIGRATOR_DB_SCHEMA_NAME)
+* **--path \<path\>** — Path to migrations files dir (env: MITRATOR_FILES_PATH)
+* **-v**, **--version** — Output the current version
+* **-h**, **--help** — Display help for command
 
 Env variables:
 
@@ -110,10 +111,68 @@ Env variables:
 ## API usage
 
 ``` ts
-Migrator = require('do-migrate')
+import Migrator, { Config } from 'do-migrate';
 
-migrator = new Migrator options
-migrator.migrate()
+const config: Config = {
+  db: {
+    host: get('MIGRATOR_DB_HOST', 'localhost'),
+    port: get('MIGRATOR_DB_PORT', 5432),
+    user: get('MIGRATOR_DB_USER', 'postgres'),
+    ...
+  },
+  migrations: {
+    path: path.resolve(__dirname, './migrations'),
+    ...
+  }
+};
+
+const migrator = new Migrator(config);
+
+// actions list without execution
+console.log(
+  await migrator.inspect();
+); 
+
+// execute migrations
+await migrator.migrate((action) => console.log(action));
+```
+
+Types:
+
+```ts
+type Config = {
+  db?: {
+    host?: string;
+    port?: number;
+    user?: string;
+    password?: string;
+    database?: string;
+    ... // pg.PoolConfig
+  };
+  migrations?: {
+    path?: string;
+    order_file?: string;
+    schema?: string;
+    table?: string;
+  };
+};
+
+enum Action {
+  Skip = 'skip',
+  Shrink = 'shrink',
+  Remove = 'remove',
+  Change = 'change',
+  Add = 'add',
+}
+
+interface Migrator {
+  constructor(config: Config): void
+  inspect(): Promise<{ name: string;  action: Action; }[]>
+  migrate(
+    notify?: (action: { name: string; action: Action, success: boolean }) => void,
+    userActions?: { name: string; action: Action }[]
+  ): Promise<void>
+}
 ```
 
 ## Docker

@@ -6,8 +6,14 @@ import { State, Migration } from './state.js';
 export default class Migrator {
 	process: Process;
 
-	constructor(userConf?: typeof envConfig) {
-		const config = userConf || envConfig;
+	constructor(userConf?: { db?: Partial<typeof envConfig.db>; migrations: Partial<typeof envConfig.migrations> }) {
+		const config = userConf
+			? {
+				db: { ...envConfig.db, ...userConf.db },
+				migrations: { ...envConfig.migrations, ...userConf.migrations },
+			}
+			: envConfig;
+
 		const db = new DB(config.db, 'migrator');
 		const state = new State(db, config.migrations);
 

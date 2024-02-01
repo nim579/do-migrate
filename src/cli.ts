@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8'));
 
 const program = new Command()
-	.version(pkg.version, '-v, --vers', 'output the current version')
+	.version(pkg.version, '-v, --version', 'output the current version')
 	.description(pkg.description)
 	.addOption(
 		new Option('--exec', 'Execute migration. You must use this flag for run migrations')
