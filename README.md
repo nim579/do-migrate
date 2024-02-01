@@ -4,7 +4,25 @@ PostgreSQL migration tool on Node.js.
 
 ## Overview
 
-### SQL table for sync:
+This SQL migration tool is designed to facilitate seamless database schema evolution. It operates based on a directory containing migration scripts and a defined order of execution. Here’s an overview of its core principles:
+
+## Migration Directory Structure
+
+1. *Migration Files*: The tool relies on a structured folder containing SQL migration files. Each migration consists of two files: `{name}.do.sql` for applying the migration and `{name}.undo.sql` for reverting it.
+2. *Order File*: Within the migration folder, an `order` file explicitly lists the names of the migrations in the sequence they should be applied. This ensures controlled and predictable migration execution.
+
+## Migration Execution Logic
+
+1. *Applying New Migrations*: When a new migration is added to the directory and listed in the `order` file, the tool automatically executes the corresponding `.do.sql` file to apply the migration.
+2. *Reverting Migrations*: If a migration is removed from the order file, the tool finds the associated .undo.sql file and executes it to revert the migration.
+3. *Modifying Migrations*: Should a migration be altered, the tool first reverts the previous version of the migration using the .undo.sql file and then applies the new version with the `.do.sql` file.
+4. *Handling Mid-List Changes*: Any changes (addition, deletion, modification) not at the end of the order list trigger the tool to revert migrations in reverse order up to the point of the earliest change. Subsequently, it applies all new or modified migrations in the correct sequence.
+
+### SQL Migration History Table
+
+Crucially, the tool maintains a table within the database that records the history of applied migrations along with their corresponding undo scripts. This facilitates efficient tracking of changes and enables precise rollback capabilities, ensuring the database schema can be accurately reverted to any previous state as defined by the migration history.
+
+Columns:
 
 * name
 * do_sql — executed migration
@@ -13,7 +31,7 @@ PostgreSQL migration tool on Node.js.
 * undo_hash — undo migration hash (SHA-256)
 * exec_date — executed date
 
-### Action plan
+### Possible actions
 
 * executed — Already executed migration
 * removed — Migration removed (executed "undo migration")
@@ -24,9 +42,7 @@ PostgreSQL migration tool on Node.js.
 
 ### Ordering and file structure
 
-Migrations order list by names.
-
-Example order file:
+Example `order` file:
 
 ```txt
 migration1
@@ -100,47 +116,18 @@ migrator = new Migrator options
 migrator.migrate()
 ```
 
-Options:
-
-* *host* — Database host
-* *port* — Database port
-* *user* — Database user
-* *password* — Database password
-* *database* — Database schema name
-* *migrations* — Path to migrations files
-* *migrations_list* — Migrations order list file name
-* *schema_table* — Migrator table name
-
-Methods:
-
-* **inspect(callback)** — return promise with info about migrations.
-* **migrate(progress)** — migrate all needed migrations. Return promise with info about migrations. In *progress* return migration status (action and migration name).
-* **remove(name, transaction=true)** – force remove migration by name (*transaction* is flag if is single transaction). Return promise,
-* **change(name, transaction=true)** — force change migration by name (*transaction* is flag if is single transaction). Return promise,
-* **add(name, transaction=true)** — force add migration by name (*transaction* is flag if is single transaction). Return promise,
-* **destroy()** — close DB connection and destroy migrator
-
-Inspect data structure:
-
-* table — migrations executed and saved in DB table (name, do_sql, undo_sql, do_hash `sha256`, undo_hash `sha256`, exec_date)
-* files — migrations in files (name, do_sql, undo_sql, do_hash `sha256`, undo_hash `sha256`, exec_date)
-* map — all migrations (name, state)
-
-States:
-
-* executed — already executed
-* added — new migration
-* changed — changed migration
-* removed – removed migration
-* inited — initial migration
-* shrink — shrink migration
-
 ## Docker
 
-Command:
+Inspect:
 
 ``` sh
 docker run --name migrator -e MIGRATOR_DB_HOST=localhost -e ... --volume ./migrations:/migrator/migrations nim579/do-migrate
+```
+
+Execute:
+
+``` sh
+docker run --name migrator -e MIGRATOR_DB_HOST=localhost -e ... --volume ./migrations:/migrator/migrations nim579/do-migrate --exec
 ```
 
 Docker Compose:
@@ -150,6 +137,8 @@ version: "2"
 services:
   migrator:
     image: nim579/do-migrate:2
+    command:
+       - "--exec"
     environment:
       - MIGRATOR_DB_HOST
       - MIGRATOR_DB_PORT

@@ -39,35 +39,30 @@ export class Migrator {
 				state.push({ name, action: Action.Shrink });
 			});
 
-		let differenceFound = false;
-		let iCur = 0;
-		let iNew = 0;
+		const skipActions: typeof state = [];
+		const removeActions: typeof state = [];
+		const addActions: typeof state = [];
+		let diffIndex = 0;
 
-		while (iCur < table.length && iNew < migrations.length) {
-			const current = this.state.tableByName[table[iCur]];
-			const next = this.state.migrationsByName[migrations[iNew]];
-
-			if (differenceFound || current.name !== next.name || current.hash.do !== next.hash.do) {
-				differenceFound = true;
-				state.push({ name: current.name, action: Action.Remove });
-				iCur++;
+		while (diffIndex < table.length && diffIndex < migrations.length) {
+			if (table[diffIndex] === migrations[diffIndex] &&
+				this.state.tableByName[table[diffIndex]]?.hash.do === this.state.migrationsByName[migrations[diffIndex]]?.hash.do) {
+				skipActions.push({ name: table[diffIndex], action: Action.Skip });
+				diffIndex++;
 			} else {
-				state.push({ name: current.name, action: Action.Skip });
-				iCur++;
-				iNew++;
+				break;
 			}
 		}
 
-		while (iCur < table.length) {
-			state.push({ name: table[iCur], action: Action.Remove });
-			iCur++;
-		}
-		while (iNew < migrations.length) {
-			state.push({ name: migrations[iNew], action: Action.Add });
-			iNew++;
+		for (let i = diffIndex; i < table.length; i++) {
+			removeActions.unshift({ name: table[i], action: Action.Remove });
 		}
 
-		return state;
+		for (let i = diffIndex; i < migrations.length; i++) {
+			addActions.push({ name: migrations[i], action: Action.Add });
+		}
+
+		return [...state, ...skipActions, ...removeActions, ...addActions];
 	}
 
 	async migrate(

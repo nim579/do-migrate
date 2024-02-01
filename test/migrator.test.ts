@@ -37,7 +37,8 @@ describe('Migrator', () => {
 					{ name: '1', action: Action.Skip },
 					{ name: '2', action: Action.Skip },
 					{ name: '3', action: Action.Skip },
-				]
+				],
+				'Wrong actions order'
 			);
 		});
 
@@ -67,7 +68,8 @@ describe('Migrator', () => {
 					{ name: '3', action: Action.Skip },
 					{ name: '4', action: Action.Skip },
 					{ name: '5', action: Action.Skip },
-				]
+				],
+				'Wrong actions order'
 			);
 		});
 
@@ -95,7 +97,8 @@ describe('Migrator', () => {
 					{ name: '3', action: Action.Skip },
 					{ name: '4', action: Action.Add },
 					{ name: '5', action: Action.Add },
-				]
+				],
+				'Wrong actions order'
 			);
 		});
 
@@ -126,7 +129,8 @@ describe('Migrator', () => {
 					{ name: '4', action: Action.Skip },
 					{ name: '5', action: Action.Remove },
 					{ name: '5', action: Action.Add },
-				]
+				],
+				'Wrong actions order'
 			);
 		});
 
@@ -155,13 +159,14 @@ describe('Migrator', () => {
 				[
 					{ name: '1', action: Action.Skip },
 					{ name: '2', action: Action.Skip },
-					{ name: '3', action: Action.Remove },
-					{ name: '4', action: Action.Remove },
 					{ name: '5', action: Action.Remove },
+					{ name: '4', action: Action.Remove },
+					{ name: '3', action: Action.Remove },
 					{ name: '3', action: Action.Add },
 					{ name: '4', action: Action.Add },
 					{ name: '5', action: Action.Add },
-				]
+				],
+				'Wrong actions order'
 			);
 		});
 
@@ -191,12 +196,13 @@ describe('Migrator', () => {
 					{ name: '1', action: Action.Shrink },
 					{ name: '2', action: Action.Skip },
 					{ name: '3', action: Action.Skip },
-					{ name: '4', action: Action.Remove },
 					{ name: '5', action: Action.Remove },
+					{ name: '4', action: Action.Remove },
 					{ name: '6', action: Action.Add },
 					{ name: '4', action: Action.Add },
 					{ name: '5', action: Action.Add },
-				]
+				],
+				'Wrong actions order'
 			);
 		});
 
@@ -223,12 +229,13 @@ describe('Migrator', () => {
 				[
 					{ name: '1', action: Action.Shrink },
 					{ name: '2', action: Action.Skip },
-					{ name: '3', action: Action.Remove },
-					{ name: '4', action: Action.Remove },
 					{ name: '5', action: Action.Remove },
+					{ name: '4', action: Action.Remove },
+					{ name: '3', action: Action.Remove },
 					{ name: '4', action: Action.Add },
 					{ name: '5', action: Action.Add },
-				]
+				],
+				'Wrong actions order'
 			);
 		});
 
@@ -257,11 +264,12 @@ describe('Migrator', () => {
 					{ name: '1', action: Action.Shrink },
 					{ name: '2', action: Action.Skip },
 					{ name: '3', action: Action.Skip },
-					{ name: '4', action: Action.Remove },
 					{ name: '5', action: Action.Remove },
+					{ name: '4', action: Action.Remove },
 					{ name: '5', action: Action.Add },
 					{ name: '4', action: Action.Add },
-				]
+				],
+				'Wrong actions order'
 			);
 		});
 
@@ -289,13 +297,14 @@ describe('Migrator', () => {
 				[
 					{ name: '1', action: Action.Shrink },
 					{ name: '2', action: Action.Skip },
-					{ name: '3', action: Action.Remove },
-					{ name: '4', action: Action.Remove },
 					{ name: '5', action: Action.Remove },
+					{ name: '4', action: Action.Remove },
+					{ name: '3', action: Action.Remove },
 					{ name: '4', action: Action.Add },
 					{ name: '3', action: Action.Add },
 					{ name: '5', action: Action.Add },
-				]
+				],
+				'Wrong actions order'
 			);
 		});
 
@@ -323,13 +332,14 @@ describe('Migrator', () => {
 				[
 					{ name: '1', action: Action.Shrink },
 					{ name: '2', action: Action.Skip },
-					{ name: '3', action: Action.Remove },
-					{ name: '4', action: Action.Remove },
 					{ name: '5', action: Action.Remove },
+					{ name: '4', action: Action.Remove },
+					{ name: '3', action: Action.Remove },
 					{ name: '4', action: Action.Add },
 					{ name: '5', action: Action.Add },
 					{ name: '6', action: Action.Add },
-				]
+				],
+				'Wrong actions order'
 			);
 		});
 	});
@@ -363,9 +373,9 @@ describe('Migrator', () => {
 			assert.deepEqual(actions, [
 				{ name: 'test1', action: Action.Shrink, success: true },
 				{ name: 'test2', action: Action.Skip, success: true },
-				{ name: 'test3', action: Action.Remove, success: true },
-				{ name: 'test4', action: Action.Remove, success: true },
 				{ name: 'test5', action: Action.Remove, success: true },
+				{ name: 'test4', action: Action.Remove, success: true },
+				{ name: 'test3', action: Action.Remove, success: true },
 				{ name: 'test4', action: Action.Add, success: true },
 				{ name: 'test5', action: Action.Add, success: true },
 				{ name: 'test6', action: Action.Add, success: true },
