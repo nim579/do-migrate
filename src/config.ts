@@ -40,10 +40,11 @@ export const db: DBConfig = {
 	user: get('MIGRATOR_DB_USER', 'postgres'),
 	password: get('MIGRATOR_DB_PASSWORD', ''),
 	database: get('MIGRATOR_DB_DATABASE', 'postgres'),
-	ssl: {
-		rejectUnauthorized: !!get('MIGRATOR_DB_SSL_REQUIRED', false),
-		ca: get<string>('MIGRATOR_DB_SSL_CA', undefined),
-	},
+	ssl: get('MIGRATOR_DB_SSL_REQUIRED', false)
+		? {
+			ca: get<string>('MIGRATOR_DB_SSL_CA', undefined),
+		}
+		: undefined,
 };
 
 export const migrations: StateConfig = {
